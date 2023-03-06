@@ -127,7 +127,7 @@ def getObs(data):
     anno = []
     sel = list(set(selAnno)&set(dAnno))
     if len(sel)>0:
-      tmp = scD.data.obs.loc[selC,sel].astype('str')
+      tmp = scD.data.obs.iloc[selC,:].loc[:,sel].astype('str')
       tmp.index = cNames
       anno += [tmp]
     sel = list(set(selAnno)-set(dAnno))
@@ -770,7 +770,7 @@ def getGSEA(data):
   return json.dumps(sorted([os.path.basename(i).replace(".symbols.gmt","") for i in glob.glob(strGSEA+"*.symbols.gmt")]))
 
 def DEG(data):
-  adata = None;
+  adata = None
   genes = data['genes']
   data['genes'] = []
   comGrp = 'cellGrp'
@@ -839,8 +839,8 @@ def DEG(data):
         raise ValueError('Unknown DE methods:'+data['DEmethod'])
     #res = de.test.two_sample(adata,comGrp,test=data['DEmethod'],noise_model=nm)
     deg = res.summary()
-    deg = deg.sort_values(by=['qval']).loc[:,['gene','log2fc','pval','qval']]
     deg['log2fc'] = -1 * deg['log2fc']
+  deg = deg.sort_values(by=['qval']).loc[:,['gene','log2fc','pval','qval']]
   #del adata
   ## plot in R
   #strF = ('/tmp/DEG%f.csv' % time.time())
@@ -1648,7 +1648,8 @@ def getBWinfo(data):
                 BWinfo["BWlink"]="links.rds"
             elif one=="bw.cluster":
                 BWinfo["BWcluster"]=pd.read_csv(strD+one,sep="\t",header=0) #"bw.cluster" .to_csv(index=False)
-    BWinfo["BWcluster"]=BWinfo["BWcluster"][BWinfo["BWcluster"]['Wig'].isin(BWinfo["BWfile"])].to_csv(index=False)
+        if len(BWinfo["BWcluster"])>0:
+            BWinfo["BWcluster"]=BWinfo["BWcluster"][BWinfo["BWcluster"]['Wig'].isin(BWinfo["BWfile"])].to_csv(index=False)
     return json.dumps(BWinfo)
 
 def plotBW(data):
